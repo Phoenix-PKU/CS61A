@@ -28,8 +28,13 @@ def ordered_digits(x):
     False
 
     """
-    "*** YOUR CODE HERE ***"
-
+    while x > 0:
+        lowest_digit = x % 10
+        ten_digit = (x // 10) % 10
+        if ten_digit > lowest_digit:
+            return False
+        x = x // 10
+    return True
 
 def get_k_run_starter(n, k):
     """Returns the 0th digit of the kth increasing run within n.
@@ -52,13 +57,14 @@ def get_k_run_starter(n, k):
     """
     i = 0
     final = None
-    while ____________________________:
-        while ____________________________:
-            ____________________________
-        final = ____________________________
-        i = ____________________________
-        n = ____________________________
+    while i <= k:
+        while n % 10 > (n // 10) % 10 and n >= 10:
+            n = n // 10
+        final = n % 10
+        i = i + 1
+        n = n // 10
     return final
+
 
 
 def make_repeater(func, n):
@@ -76,8 +82,12 @@ def make_repeater(func, n):
     >>> make_repeater(square, 0)(5) # Yes, it makes sense to apply the function zero times!
     5
     """
-    "*** YOUR CODE HERE ***"
-
+    def repeating(x):
+        for i in range(n):
+            x = func(x)
+        return x
+    return repeating
+    
 
 def composer(func1, func2):
     """Return a function f, such that f(x) = func1(func2(x))."""
@@ -94,8 +104,7 @@ def apply_twice(func):
     >>> apply_twice(square)(2)
     16
     """
-    "*** YOUR CODE HERE ***"
-
+    return make_repeater(func,2)
 
 def div_by_primes_under(n):
     """
@@ -108,14 +117,26 @@ def div_by_primes_under(n):
     >>> div_by_primes_under(5)(1)
     False
     """
+    """ I can't think of a way to
+    pass this function with its given structure
+    so i wrote my own code.
+    """
+    """  This is given structure
     checker = lambda x: False
-    i = ____________________________
-    while ____________________________:
+    i = 1 
+    while i <= n:
         if not checker(i):
-            checker = ____________________________
-        i = ____________________________
-    return ____________________________
+            checker = lambda x:x % i == 0
+        i = i + 1
+    return checker
+    """
+    def checker(x):
+        for i in range(2, n):
+            if x % i == 0:
+                return True
+        return False
 
+    return checker
 
 def div_by_primes_under_no_lambda(n):
     """
@@ -128,6 +149,7 @@ def div_by_primes_under_no_lambda(n):
     >>> div_by_primes_under_no_lambda(5)(1)
     False
     """
+    """ given structure
     def checker(x):
         return False
     i = ____________________________
@@ -136,11 +158,17 @@ def div_by_primes_under_no_lambda(n):
             def outer(____________________________):
                 def inner(____________________________):
                     return ____________________________
-                return ____________________________
+                return 
             checker = ____________________________
         i = ____________________________
-    return ____________________________
-
+    return checker
+    """
+    def checker(x):
+        for i in range(2,n):
+            if x % i == 0:
+                return True
+        return False
+    return checker
 
 def zero(f):
     return lambda x: x
@@ -152,13 +180,12 @@ def successor(n):
 
 def one(f):
     """Church numeral 1: same as successor(zero)"""
-    "*** YOUR CODE HERE ***"
-
+    return lambda f: lambda x: f(zero(f)(x))
 
 def two(f):
     """Church numeral 2: same as successor(successor(zero))"""
-    "*** YOUR CODE HERE ***"
-
+    g = lambda f: lambda x: f(zero(f)(x))
+    return lambda f: lambda x: f(g(f)(x))
 
 three = successor(two)
 
@@ -175,8 +202,13 @@ def church_to_int(n):
     >>> church_to_int(three)
     3
     """
-    "*** YOUR CODE HERE ***"
-
+    ans = 0
+    func = zero
+    while func != n:
+        print("n,func = ",n,func)
+        ans += 1
+        func = successor(func)
+    return ans
 
 def add_church(m, n):
     """Return the Church numeral for m + n, for Church numerals m and n.
@@ -196,7 +228,6 @@ def mul_church(m, n):
     >>> church_to_int(mul_church(three, four))
     12
     """
-    "*** YOUR CODE HERE ***"
 
 
 def pow_church(m, n):
@@ -207,4 +238,3 @@ def pow_church(m, n):
     >>> church_to_int(pow_church(three, two))
     9
     """
-    "*** YOUR CODE HERE ***"
