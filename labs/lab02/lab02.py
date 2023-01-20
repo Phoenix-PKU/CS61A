@@ -13,9 +13,7 @@ def lambda_curry2(func):
     >>> lambda_curry2(mod)(123)(10)
     3
     """
-    "*** YOUR CODE HERE ***"
-    return ______
-
+    return lambda x: lambda y:func(x,y)
 
 def lambda_curry2_syntax_check():
     """Checks that definition of lambda_curry2 is one line.
@@ -55,8 +53,14 @@ def count_cond(condition):
     >>> count_primes(20)   # 2, 3, 5, 7, 11, 13, 17, 19
     8
     """
-    "*** YOUR CODE HERE ***"
-
+    def count(n):
+        ans = 0
+        for i in range(1,n + 1):
+            if (condition(n,i)):
+                ans += 1
+        return ans
+    return count
+    
 
 def composer(f, g):
     """Return the composition function which given x, computes f(g(x)).
@@ -90,8 +94,9 @@ def composite_identity(f, g):
     >>> b1(4)                            # (4 + 1)^2 != 4^2 + 1
     False
     """
-    "*** YOUR CODE HERE ***"
-
+    def identity(x):
+        return composer(f,g)(x) == composer(g,f)(x)
+    return identity
 
 def cycle(f1, f2, f3):
     """Returns a function that is itself a higher-order function.
@@ -119,4 +124,19 @@ def cycle(f1, f2, f3):
     >>> do_two_cycles(1)
     19
     """
-    "*** YOUR CODE HERE ***"
+    def real_cycle(n):
+        assert n >= 0
+        def calculate(x):
+            nonlocal n
+            while n >= 3:
+                n -= 3
+                x = f3(f2(f1(x)))
+            if n == 0:
+                return x
+            elif n == 1:
+                return f1(x)
+            else:
+                return f2(f1(x))
+        return calculate
+    return real_cycle
+
