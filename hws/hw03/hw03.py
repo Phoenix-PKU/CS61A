@@ -64,7 +64,15 @@ def pingpong(n):
     ...       ['Assign', 'AnnAssign', 'AugAssign', 'NamedExpr'])
     True
     """
-    
+    return pingpong_helper(1, 1, 1, n)
+
+def pingpong_helper(cur, add, idx, n):
+    if idx == n:
+        return cur
+    if '8' in str(idx) or idx % 8 == 0:
+        return pingpong_helper(cur - add, -add, idx + 1, n)
+    else:
+        return pingpong_helper(cur + add, add, idx + 1, n)
 
 def next_larger_coin(coin):
     """Returns the next larger coin in order.
@@ -119,16 +127,24 @@ def count_coins(change):
     >>> check(HW_SOURCE_FILE, 'count_coins', ['While', 'For'])
     True
     """
-    "*** YOUR CODE HERE ***"
+    return count_coins_helper(change, 25)
+
+def count_coins_helper(change, max_coin):
+    if change < 0:
+        return 0
+    if change == 0:
+        return 1
+    if max_coin == 1:
+        return 1
+    return count_coins_helper(change, next_smaller_coin(max_coin))\
+            + count_coins_helper(change - max_coin, max_coin)
 
 
 anonymous = False  # Change to True if you would like to remain anonymous on the final leaderboard.
 
 
 def beaver(f):
-    "*** YOUR CODE HERE ***"
-    __________________
-
+    [f() for _ in range(1000)]
 
 def beaver_syntax_check():
     """
