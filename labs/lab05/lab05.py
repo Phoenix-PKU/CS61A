@@ -14,8 +14,12 @@ def flatten(s):
     >>> x
     [[1, [1, 1]], 1, [1, 1]]
     """
-    "*** YOUR CODE HERE ***"
-
+    if s == []:
+        return []
+    if type(s[0]) != list:
+        return [s[0]] + flatten(s[1:])
+    else:
+        return flatten(s[0]) + flatten(s[1:])
 
 from math import sqrt
 
@@ -31,8 +35,9 @@ def distance(city_a, city_b):
     >>> distance(city_c, city_d)
     5.0
     """
-    "*** YOUR CODE HERE ***"
-
+    dis_lat = abs(get_lat(city_a) - get_lat(city_b))
+    dis_lon = abs(get_lon(city_a) - get_lon(city_b))
+    return sqrt(dis_lat ** 2 + dis_lon ** 2)
 
 def closer_city(lat, lon, city_a, city_b):
     """
@@ -49,8 +54,11 @@ def closer_city(lat, lon, city_a, city_b):
     >>> closer_city(41.29, 174.78, bucharest, vienna)
     'Bucharest'
     """
-    "*** YOUR CODE HERE ***"
-
+    temp_city = make_city('temp', lat, lon)
+    if distance(temp_city, city_a) < distance(temp_city, city_b):
+        return get_name(city_a)
+    else:
+        return get_name(city_b)
 
 def check_city_abstraction():
     """
@@ -150,8 +158,15 @@ def berry_finder(t):
     >>> berry_finder(t)
     True
     """
-    "*** YOUR CODE HERE ***"
-
+    if not is_tree(t):
+        return False
+    root = label(t)
+    if type(root) == str and root == 'berry':
+        return True
+    for branch in branches(t):
+        if berry_finder(branch):
+            return True
+    return False
 
 def sprout_leaves(t, leaves):
     """Sprout new leaves containing the data in leaves at each leaf in
@@ -186,7 +201,12 @@ def sprout_leaves(t, leaves):
           1
           2
     """
-    "*** YOUR CODE HERE ***"
+    if is_leaf(t):
+        tree_leaves = [tree(leaf) for leaf in leaves]
+        return tree(label(t), tree_leaves)
+    else:
+        new_branches = [sprout_leaves(branch, leaves) for branch in branches(t)]
+        return tree(label(t), new_branches)
 
 # Abstraction tests for sprout_leaves and berry_finder
 
@@ -249,7 +269,10 @@ def preorder(t):
     >>> preorder(tree(2, [tree(4, [tree(6)])]))
     [2, 4, 6]
     """
-    "*** YOUR CODE HERE ***"
+    if is_leaf(t):
+        return [label(t)]
+    else:
+        return [label(t)] + sum([preorder(branch) for branch in branches(t)],[])
 
 
 def add_trees(t1, t2):
@@ -287,8 +310,21 @@ def add_trees(t1, t2):
         5
       5
     """
-    "*** YOUR CODE HERE ***"
-
+    if is_leaf(t1) and is_leaf(t2):
+        return tree(label(t1) + label(t2))
+    branches1, branches2 = branches(t1), branches(t2)
+    new_branches = []
+    b_min, b_max, i = min(len(branches1), len(branches2)), max(len(branches1), len(branches2)), 0
+    while i < b_min:
+        new_branches.append(add_trees(branches1[i], branches2[i]))
+        i += 1
+    while i < b_max:
+        if len(branches1) > len(branches2):
+            new_branches.append(branches1[i])
+        else:
+            new_branches.append(branches2[i])
+        i += 1
+    return tree(label(t1) + label(t2), new_branches) 
 
 def change_abstraction(change):
     """
