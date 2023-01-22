@@ -30,7 +30,13 @@ def pick(paragraphs, select, k):
     ''
     """
     # BEGIN PROBLEM 1
-    "*** YOUR CODE HERE ***"
+    num = 0
+    for para in paragraphs:
+        if select(para) == True:
+            if num == k:
+                return para
+            num += 1
+    return ''
     # END PROBLEM 1
 
 
@@ -49,7 +55,15 @@ def about(topic):
     """
     assert all([lower(x) == x for x in topic]), 'topics should be lowercase.'
     # BEGIN PROBLEM 2
-    "*** YOUR CODE HERE ***"
+    def contain(paragraph):
+        paragraph = remove_punctuation(paragraph)
+        all_words = paragraph.split()
+        for word_para in all_words:
+            for word_topic in topic:
+                if word_para.lower() == word_topic:
+                    return True
+        return False
+    return contain
     # END PROBLEM 2
 
 
@@ -76,10 +90,19 @@ def accuracy(typed, source):
     >>> accuracy('', '')
     100.0
     """
-    typed_words = split(typed)
-    source_words = split(source)
     # BEGIN PROBLEM 3
-    "*** YOUR CODE HERE ***"
+    typed = typed.replace('\t','') # '\t' doesn't count
+    typed_words = typed.split()
+    source_words = source.split()
+    total_words, correct_words = len(typed_words), 0
+    if len(typed_words) == len(source_words) == 0:
+        return 100.0
+    if len(typed_words) == 0 or len(source_words) == 0:
+        return 0.0
+    for i in range(min(total_words, len(source_words))):
+        if typed_words[i] == source_words[i]:
+            correct_words += 1
+    return 100 * correct_words / total_words
     # END PROBLEM 3
 
 
@@ -97,7 +120,7 @@ def wpm(typed, elapsed):
     """
     assert elapsed > 0, 'Elapsed time must be positive'
     # BEGIN PROBLEM 4
-    "*** YOUR CODE HERE ***"
+    return len(typed) * 12 / elapsed
     # END PROBLEM 4
 
 
@@ -124,9 +147,15 @@ def autocorrect(typed_word, word_list, diff_function, limit):
     'testing'
     """
     # BEGIN PROBLEM 5
-    "*** YOUR CODE HERE ***"
+    if typed_word in word_list:
+        return typed_word
+    lowest_word = min(word_list, key = lambda source_word:\
+                      diff_function(typed_word, source_word, limit))
+    if (diff_function(typed_word, lowest_word, limit) > limit):
+        return typed_word
+    else:
+        return lowest_word
     # END PROBLEM 5
-
 
 def feline_fixes(typed, source, limit):
     """A diff function for autocorrect that determines how many letters
@@ -137,6 +166,7 @@ def feline_fixes(typed, source, limit):
         typed: a starting word
         source: a string representing a desired goal word
         limit: a number representing an upper bound on the number of chars that must change
+
 
     >>> big_limit = 10
     >>> feline_fixes("nice", "rice", big_limit)    # Substitute: n -> r
@@ -151,9 +181,20 @@ def feline_fixes(typed, source, limit):
     5
     """
     # BEGIN PROBLEM 6
-    assert False, 'Remove this line'
+    # must implement recursively, no for and which
+    return feline_fixes_helper(typed, source, limit, 0)
     # END PROBLEM 6
 
+def feline_fixes_helper(typed, source, limit, cur_dif):
+    # cur_dif means the difference of the two words now
+    if cur_dif > limit:
+        return cur_dif
+    if len(typed) == 0 or len(source) == 0:
+        return max(len(typed), len(source)) + cur_dif
+    if typed[0] == source[0]:
+        return feline_fixes_helper(typed[1:], source[1:], limit, cur_dif)
+    else:
+        return feline_fixes_helper(typed[1:], source[1:], limit, cur_dif + 1)
 
 def minimum_mewtations(start, goal, limit):
     """A diff function that computes the edit distance from START to GOAL.
@@ -170,29 +211,56 @@ def minimum_mewtations(start, goal, limit):
     >>> minimum_mewtations("ckiteus", "kittens", big_limit) # ckiteus -> kiteus -> kitteus -> kittens
     3
     """
-    assert False, 'Remove this line'
-    if ______________:  # Fill in the condition
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-    elif ___________:  # Feel free to remove or add additional cases
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-    else:
-        add = ...  # Fill in these lines
-        remove = ...
-        substitute = ...
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
+    # must implement recursively, no for and which
+    # any number larger than limit and should minimize 
+    # the amount of computation needed to do so
+    return minimum_mewtations_helper(start, goal, limit, 0)
 
+def minimum_mewtations_helper(start, goal, limit, cur_dif):
+    if cur_dif > limit:
+        return cur_dif
+    if start == '' or goal == '':
+        return max(len(start), len(goal)) + cur_dif
+    else:
+        add = minimum_mewtations_helper(start[1:], goal, limit, cur_dif + 1)
+        remove = minimum_mewtations_helper(start, goal[1:], limit, cur_dif + 1)
+        if start[0] == goal[0]:
+            substitute = minimum_mewtations_helper(start[1:], goal[1:], limit, cur_dif)
+        else:
+            substitute = minimum_mewtations_helper(start[1:], goal[1:], limit, cur_dif + 1)
+        return min(add, remove, substitute)
 
 def final_diff(typed, source, limit):
     """A diff function that takes in a string TYPED, a string SOURCE, and a number LIMIT.
     If you implement this function, it will be used."""
-    assert False, 'Remove this line to use your final_diff function.'
-
+    #return minimum_mewtations(typed, source, limit)
+    if abs(len(typed) - len(source)) > limit:
+        return abs(len(typed) - len(source))
+    dif_list = [[0 for _ in range(len(source))] for __ in range(len(typed))]
+    for i in range(len(typed)):
+        dif_list[i][0] = i
+    for j in range(len(source)):
+        dif_list[0][j] = j
+    for i in range(1, len(typed)):
+        for j in range(1, len(source)):
+            if typed[i].lower() == source[j].lower():
+                dif_list[i][j] = dif_list[i - 1][j - 1]
+            else:
+                substitute = dif_list[i - 1][j - 1]
+                delete = dif_list[i - 1][j]
+                add = dif_list[i][j - 1]
+                if typed[i] == source[j - 1]:
+                    # maybe double type
+                    dif_list[i][j] = min(substitute + 1, add + 1, delete)
+                elif typed[i] == source[j - 1] and typed[j] == source[i - 1]:
+                    # swapped counted as one
+                    dif_list[i][j] = min(substitute, add + 1, delete + 1)
+                elif i < len(typed) - 1 and typed[i + 1] == source[j]:
+                    # maybe miss type
+                    dif_list[i][j] = min(substitute + 1, add, delete + 1)
+                else:
+                    dif_list[i][j] = min(substitute, add, delete) + 1
+    return dif_list[-1][-1]
 
 FINAL_DIFF_LIMIT = 6  # REPLACE THIS WITH YOUR LIMIT
 
@@ -226,6 +294,14 @@ def report_progress(typed, prompt, user_id, upload):
     0.2
     """
     # BEGIN PROBLEM 8
+    total_words, correct_words = len(prompt), 0
+    for i in range(len(typed)):
+        if typed[i] == prompt[i]:
+            correct_words += 1
+        else:
+            break
+    upload({'id': user_id ,'progress': correct_words / total_words})
+    return correct_words / total_words
     "*** YOUR CODE HERE ***"
     # END PROBLEM 8
 
@@ -248,7 +324,13 @@ def time_per_word(words, times_per_player):
     [[6, 3, 6, 2], [10, 6, 1, 2]]
     """
     # BEGIN PROBLEM 9
-    "*** YOUR CODE HERE ***"
+    times = [[] for _ in range(len(times_per_player))]
+    for player in range(len(times_per_player)):
+        num_words = len(times_per_player[player])
+        for word_idx in range(num_words - 1):
+            times[player].append(times_per_player[player][word_idx + 1]\
+                        - times_per_player[player][word_idx])
+    return match(words, times)
     # END PROBLEM 9
 
 
@@ -267,10 +349,16 @@ def fastest_words(match):
     >>> p1
     [4, 1, 6]
     """
+    # BEGIN PROBLEM 10
     player_indices = range(len(get_all_times(match)))  # contains an *index* for each player
     word_indices = range(len(get_all_words(match)))    # contains an *index* for each word
-    # BEGIN PROBLEM 10
-    "*** YOUR CODE HERE ***"
+    player_words = [[] for _ in player_indices]
+    for idx in word_indices:
+        # notice the data abstraction, you can't assume match is a dict.
+        word = get_word(match, idx)
+        min_func = lambda player: time(match, player, idx)
+        player_words[min(list(player_indices), key = min_func)].append(word)
+    return player_words
     # END PROBLEM 10
 
 
