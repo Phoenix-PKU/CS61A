@@ -29,8 +29,15 @@ def insert_items(lst, entry, elem):
     ...       ['List', 'ListComp', 'Slice'])
     True
     """
-    "*** YOUR CODE HERE ***"
-
+    l, idx = len(lst), 0
+    while idx < l:
+        if lst[idx] == entry:
+            lst.insert(idx + 1, elem)
+            idx += 2
+            l += 1
+        else:
+            idx += 1
+    return lst
 
 def count_occurrences(t, n, x):
     """Return the number of times that x appears in the first n elements of iterator t.
@@ -52,7 +59,11 @@ def count_occurrences(t, n, x):
     >>> count_occurrences(s2, 6, 6)
     2
     """
-    "*** YOUR CODE HERE ***"
+    cnt = 0
+    for _ in range(n):
+        if x == next(t):
+            cnt += 1
+    return cnt
 
 
 def repeated(t, k):
@@ -77,4 +88,15 @@ def repeated(t, k):
     2
     """
     assert k > 1
-    "*** YOUR CODE HERE ***"
+    prev, cnt = next(t), 1
+    while 1:
+        cur = next(t)
+        if cur == prev:
+            cnt += 1
+            if cnt == k:
+                return cur
+        else:
+            cnt = 1
+            prev = cur
+
+    
