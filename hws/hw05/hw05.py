@@ -10,7 +10,19 @@ def merge(a, b):
     >>> [next(result) for _ in range(10)]
     [2, 3, 5, 7, 8, 9, 11, 13, 14, 15]
     """
-    "*** YOUR CODE HERE ***"
+    cur_a, cur_b = next(a), next(b)
+    while True:
+      if cur_a > cur_b:
+        yield cur_b
+        cur_b = next(b)
+      elif cur_b > cur_a:
+        yield cur_a 
+        cur_a = next(a)
+      else:
+        yield cur_a
+        cur_a, cur_b = next(a), next(b)
+        
+      
 
 
 def gen_perms(seq):
@@ -35,8 +47,14 @@ def gen_perms(seq):
     >>> sorted(gen_perms("ab"))
     [['a', 'b'], ['b', 'a']]
     """
-    "*** YOUR CODE HERE ***"
-
+    if len(seq) <= 1:
+      yield list(seq)
+    else:
+      for sub_perms in gen_perms(seq[1:]):
+        for idx in range(len(seq)):
+          left = sub_perms[:idx]
+          right = sub_perms[idx:]
+          yield left + [seq[0]] + right        
 
 def yield_paths(t, value):
     """Yields all possible paths from the root of t to a node with the label
@@ -72,10 +90,11 @@ def yield_paths(t, value):
     >>> sorted(list(path_to_2))
     [[0, 2], [0, 2, 1, 2]]
     """
-    "*** YOUR CODE HERE ***"
-    for _______________ in _________________:
-        for _______________ in _________________:
-            "*** YOUR CODE HERE ***"
+    if label(t) == value:
+      yield [label(t)]
+    for b in branches(t):
+        for sub_path in yield_paths(b, value):
+            yield [label(t)] + sub_path
 
 
 def hailstone(n):
@@ -88,7 +107,13 @@ def hailstone(n):
     >>> next(hail_gen)
     1
     """
-    "*** YOUR CODE HERE ***"
+    yield n
+    while n == 1:
+      yield 1
+    if n % 2 == 0:
+      yield from hailstone(n // 2)
+    else:
+      yield from hailstone(3 * n + 1)
 
 
 def remainders_generator(m):
@@ -122,7 +147,15 @@ def remainders_generator(m):
     7
     11
     """
-    "*** YOUR CODE HERE ***"
+    for remainder in range(m):
+      def remainder_gen():
+        cur = remainder
+        if cur == 0:
+          cur = m
+        while True:
+          yield cur
+          cur += m
+      yield remainder_gen()
 
 
 # Tree ADT
