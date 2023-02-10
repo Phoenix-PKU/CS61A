@@ -170,6 +170,17 @@ def div_by_primes_under_no_lambda(n):
         return False
     return checker
 
+"""my understanding:
+
+numeral(f) takes a function as argument, return a function,
+
+numeral_n_1(f) and numeral_n(f)
+numeral_n = successor(numeral_n_1(f))
+numeral_n return a function, it takes another function as
+argument, return a function, which takes x (whatever it is)
+and return second function to (numeral_n_1 to second function)
+to x.
+"""
 def zero(f):
     return lambda x: x
 
@@ -204,7 +215,7 @@ def church_to_int(n):
     """
     ans = 0
     func = zero
-    while func != n:
+    while func is not n:
         print("n,func = ",n,func)
         ans += 1
         func = successor(func)
