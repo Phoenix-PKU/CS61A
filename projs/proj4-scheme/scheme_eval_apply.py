@@ -34,7 +34,12 @@ def scheme_eval(expr, env, _=None):  # Optional third argument is ignored
         return scheme_forms.SPECIAL_FORMS[first](rest, env)
     else:
         # BEGIN PROBLEM 3
-        "*** YOUR CODE HERE ***"
+        procedure = scheme_eval(first, env)
+        validate_procedure(procedure)
+        def scheme_eval_helper(expr):
+            return scheme_eval(expr, env)
+        args = rest.map(scheme_eval_helper)
+        return scheme_apply(procedure, args, env)
         # END PROBLEM 3
 
 
@@ -46,21 +51,32 @@ def scheme_apply(procedure, args, env):
        assert False, "Not a Frame: {}".format(env)
     if isinstance(procedure, BuiltinProcedure):
         # BEGIN PROBLEM 2
-        "*** YOUR CODE HERE ***"
+        parameters = []
+        while (args != nil):
+            parameters.append(args.first)
+            args = args.rest
+        if procedure.need_env == True:
+            parameters.append(env)
         # END PROBLEM 2
         try:
             # BEGIN PROBLEM 2
-            "*** YOUR CODE HERE ***"
+            return procedure.py_func(*parameters)
             # END PROBLEM 2
         except TypeError as err:
             raise SchemeError('incorrect number of arguments: {0}'.format(procedure))
     elif isinstance(procedure, LambdaProcedure):
         # BEGIN PROBLEM 9
-        "*** YOUR CODE HERE ***"
+        # Note that new frame should be a child of the 
+        # frame in which the lambda is defined.
+        # The env provided as an argument to scheme_apply is 
+        # instead the frame in which the procedure is called.
+        new_env = procedure.env.make_child_frame(procedure.formals, args)
+        return eval_all(procedure.body, new_env)
         # END PROBLEM 9
     elif isinstance(procedure, MuProcedure):
         # BEGIN PROBLEM 11
-        "*** YOUR CODE HERE ***"
+        new_env = env.make_child_frame(procedure.formals, args)
+        return eval_all(procedure.body, new_env)
         # END PROBLEM 11
     else:
         assert False, "Unexpected procedure: {}".format(procedure)
@@ -82,7 +98,15 @@ def eval_all(expressions, env):
     2
     """
     # BEGIN PROBLEM 6
-    return scheme_eval(expressions.first, env)  # replace this with lines of your own code
+    if expressions == nil:
+        return None
+    else:
+        if expressions.rest == nil:
+            val = scheme_eval(expressions.first, env, True)
+            return val
+        else:
+            val = scheme_eval(expressions.first, env)
+            return eval_all(expressions.rest, env)
     # END PROBLEM 6
 
 
@@ -120,7 +144,9 @@ def optimize_tail_calls(unoptimized_scheme_eval):
 
         result = Unevaluated(expr, env)
         # BEGIN PROBLEM EC
-        "*** YOUR CODE HERE ***"
+        while isinstance(result, Unevaluated):
+            result = unoptimized_scheme_eval(result.expr, result.env)
+        return result
         # END PROBLEM EC
     return optimized_eval
 
@@ -129,4 +155,4 @@ def optimize_tail_calls(unoptimized_scheme_eval):
 # Uncomment the following line to apply tail call optimization #
 ################################################################
 
-# scheme_eval = optimize_tail_calls(scheme_eval)
+scheme_eval = optimize_tail_calls(scheme_eval)
