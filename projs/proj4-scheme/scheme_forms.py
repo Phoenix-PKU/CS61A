@@ -238,7 +238,16 @@ def do_define_macro(expressions, env):
     1
     """
     # BEGIN PROBLEM OPTIONAL_1
-    "*** YOUR CODE HERE ***"
+    validate_form(expressions, 2) 
+    signature = expressions.first
+    validate_formals(signature)
+    if not isinstance(signature, Pair):
+        raise SchemeError('improper form for define-macro')
+    name = signature.first
+    formals = signature.rest
+    body = expressions.rest
+    env.define(name, MacroProcedure(formals, body, env))
+    return name
     # END PROBLEM OPTIONAL_1
 
 

@@ -34,12 +34,18 @@ def scheme_eval(expr, env, _=None):  # Optional third argument is ignored
         return scheme_forms.SPECIAL_FORMS[first](rest, env)
     else:
         # BEGIN PROBLEM 3
-        procedure = scheme_eval(first, env)
-        validate_procedure(procedure)
-        def scheme_eval_helper(expr):
-            return scheme_eval(expr, env)
-        args = rest.map(scheme_eval_helper)
-        return scheme_apply(procedure, args, env)
+        if scheme_symbolp(first) and isinstance(env.lookup(first), MacroProcedure):
+            args = rest
+            macro_func = env.lookup(first)
+            procedure = LambdaProcedure(macro_func.formals, macro_func.body, env)
+            return scheme_eval(complete_apply(procedure, args, env), env)
+        else:
+            def scheme_eval_helper(expr):
+                return scheme_eval(expr, env)
+            procedure = scheme_eval(first, env)
+            validate_procedure(procedure)
+            args = rest.map(scheme_eval_helper)
+            return scheme_apply(procedure, args, env)
         # END PROBLEM 3
 
 
@@ -66,10 +72,6 @@ def scheme_apply(procedure, args, env):
             raise SchemeError('incorrect number of arguments: {0}'.format(procedure))
     elif isinstance(procedure, LambdaProcedure):
         # BEGIN PROBLEM 9
-        # Note that new frame should be a child of the 
-        # frame in which the lambda is defined.
-        # The env provided as an argument to scheme_apply is 
-        # instead the frame in which the procedure is called.
         new_env = procedure.env.make_child_frame(procedure.formals, args)
         return eval_all(procedure.body, new_env)
         # END PROBLEM 9
@@ -122,6 +124,8 @@ class Unevaluated:
         self.expr = expr
         self.env = env
 
+    def __str__(self):
+        return str(self.expr)
 
 def complete_apply(procedure, args, env):
     """Apply procedure to args in env; ensure the result is not an Unevaluated."""
